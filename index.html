@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vehicle Type Recognition</title>
+
+<style>
+:root {
+  --bg-dark: linear-gradient(135deg, #1e3c72, #2a5298);
+  --bg-light: linear-gradient(135deg, #eef2ff, #ffffff);
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg-dark);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  transition: 0.4s;
+  overflow-y: auto; /* ✅ scroll enabled */
+}
+
+/* Floating Background Vehicles */
+.bg-img {
+  position: absolute;
+  width: 220px;
+  opacity: 0.25; /* ✅ improved visibility */
+  animation: float 6s ease-in-out infinite;
+  filter: blur(1px); /* optional premium look */
+}
+
+.bg1 { top: 5%; left: 5%; }
+.bg2 { top: 10%; right: 5%; animation-delay: 1s; }
+.bg3 { bottom: 5%; left: 8%; animation-delay: 2s; }
+.bg4 { bottom: 8%; right: 8%; animation-delay: 3s; }
+
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Card */
+.container {
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  width: 420px;
+  text-align: center;
+  z-index: 2;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+/* Toggle */
+.toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.2);
+}
+
+/* Text */
+h1 { margin-bottom: 5px; }
+p { margin-bottom: 40px; color: #ddd; }
+
+/* Upload */
+.upload-box {
+  border: 2px dashed rgba(255,255,255,0.5);
+  padding: 25px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.upload-box:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+input { display: none; }
+
+/* Image */
+img.preview {
+  width: 100%;
+  max-height: 300px; /* ✅ prevents overflow */
+  object-fit: cover;
+  margin-top: 20px;
+  border-radius: 12px;
+}
+
+/* Button */
+button {
+  margin-top: 20px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: #00c6ff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Result */
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.1);
+  display: none;
+}
+
+/* Progress Bar */
+.progress-bar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #00ffcc;
+  transition: width 1s ease;
+}
+
+/* Highlight colors */
+.car { color: #00ffcc; }
+.bus { color: #ffcc00; }
+.truck { color: #ff5733; }
+.motorcycle { color: #ff66ff; }
+
+/* Loader */
+.loader {
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: auto;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Light Mode */
+.light {
+  background: var(--bg-light);
+  color: black;
+}
+.light .container {
+  background: rgba(255,255,255,0.9);
+  color: black;
+}
+.light p { color: #555; }
+</style>
+</head>
+
+<body>
+
+<!-- ✅ Correct Floating Vehicles -->
+<img src="https://cdn-icons-png.flaticon.com/512/744/744465.png" class="bg-img bg1"> <!-- Car -->
+
+<!-- Bus -->
+<img src="https://img.icons8.com/color/240/bus.png" class="bg-img bg2">
+
+<!-- Truck -->
+<img src="https://img.icons8.com/color/240/truck.png" class="bg-img bg3">
+
+<!-- Bike (Motorcycle) -->
+<img src="https://img.icons8.com/color/240/motorcycle.png" class="bg-img bg4">
+
+<div class="toggle" onclick="toggleMode()">🌙 / ☀️</div>
+
+<div class="container">
+  <h1>Vehicle Type Recognition</h1>
+  <p>EfficientNet Model</p>
+  <p>Upload image to classify vehicle type</p>
+
+  <label class="upload-box">
+    Click to upload image
+    <input type="file" id="fileInput" accept="image/*">
+  </label>
+
+  <div id="preview"></div>
+
+  <button id="predictBtn" style="display:none;">Predict</button>
+
+  <div class="result" id="resultBox">
+    <div id="loader" class="loader"></div>
+
+    <h3 id="resultText"></h3>
+    <p id="confidenceText"></p>
+
+    <div class="progress-bar">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const input = document.getElementById("fileInput");
+const preview = document.getElementById("preview");
+const btn = document.getElementById("predictBtn");
+const resultBox = document.getElementById("resultBox");
+const resultText = document.getElementById("resultText");
+const confidenceText = document.getElementById("confidenceText");
+const loader = document.getElementById("loader");
+const progressFill = document.getElementById("progressFill");
+
+// Upload preview
+input.addEventListener("change", () => {
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = e => {
+    preview.innerHTML = `<img class="preview" src="${e.target.result}">`;
+    btn.style.display = "block";
+    resultBox.style.display = "none";
+  };
+
+  reader.readAsDataURL(file);
+});
+
+// Predict
+btn.addEventListener("click", async () => {
+  const file = input.files[0];
+  const formData = new FormData();
+  formData.append("file", file);
+
+  resultBox.style.display = "block";
+  loader.style.display = "block";
+  progressFill.style.width = "0%";
+
+  const res = await fetch("http://127.0.0.1:5000/predict", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  loader.style.display = "none";
+
+  const cls = data.prediction;
+  const conf = data.confidence;
+
+  resultText.className = cls;
+  resultText.textContent = "Prediction: " + cls;
+  confidenceText.textContent = "Confidence: " + conf.toFixed(2) + "%";
+
+  setTimeout(() => {
+    progressFill.style.width = conf + "%";
+  }, 200);
+});
+
+// Theme toggle
+function toggleMode() {
+  document.body.classList.toggle("light");
+}
+</script>
+
+</body>
+</html>
