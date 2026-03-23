@@ -55,7 +55,7 @@ It also includes a **modern interactive UI** and a **Flask backend API** for rea
 ```
 vehicle-type-recognition/
 │
-├── app.py                 # Flask backend
+├── app.py                # Flask backend
 ├── index.html            # Frontend UI
 ├── vehicle_weights.h5    # Trained model weights
 ├── class_names.json      # Class labels
@@ -84,13 +84,6 @@ vehicle-type-recognition/
 * Predicted vehicle type
 * Confidence percentage
 * Visual feedback with UI enhancements
-
----
-
-## 🌐 Deployment
-
-* Frontend: Netlify
-* Backend: Render
 
 ---
 
