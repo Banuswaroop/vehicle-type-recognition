@@ -6,7 +6,7 @@ A deep learning-based system that classifies vehicle types (Car, Bus, Truck, Mot
 
 ## 🔥 Project Overview
 
-This project leverages **EfficientNet (Transfer Learning)** along with **multimodal features (image + metadata)** along with fine-grained classification to accurately classify vehicle types.
+This project leverages **EfficientNet(B0)**,**multimodal features (image + metadata)** along with **fine-grained classification** to accurately classify vehicle types.
 It also includes a **modern interactive UI** and a **Flask backend API** for real-time predictions.
 
 ---
