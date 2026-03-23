@@ -16,6 +16,7 @@ It also includes a **modern interactive UI** and a **Flask backend API** for rea
 * 🚗 Vehicle classification (Car, Bus, Truck, Motorcycle)
 * 🧠 EfficientNet-based deep learning model
 * 🔀 Multimodal input (image + brightness + dimensions)
+* Fine-grained classification
 * 🌐 Flask REST API for predictions
 * 🎨 Professional UI with:
 
