@@ -1,5 +1,5 @@
 from flask_cors import CORS
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -9,13 +9,13 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-IMG_SIZE = (224,224)
+IMG_SIZE = (224, 224)
 
 # Load class names
 with open("class_names.json") as f:
     class_names = json.load(f)
 
-# 🔥 Rebuild model (same as notebook)
+# Rebuild model
 image_input = tf.keras.Input(shape=(224, 224, 3))
 
 base_model = tf.keras.applications.EfficientNetB0(
@@ -38,18 +38,29 @@ combined = tf.keras.layers.Dropout(0.4)(combined)
 
 output = tf.keras.layers.Dense(len(class_names), activation="softmax")(combined)
 
-model = tf.keras.Model(inputs=[image_input, meta_input], outputs=output)
+model = tf.keras.Model(
+    inputs=[image_input, meta_input],
+    outputs=output
+)
 
 # Load weights
 model.load_weights("vehicle_weights.h5")
 print("✅ Model ready!")
 
+# Home page route
+@app.route("/")
+def home():
+    return send_file("index.html")
+
 # Metadata function
 def extract_metadata(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    brightness = np.mean(gray)/255.0
-    h,w,_ = img.shape
-    return np.array([brightness, h/1000, w/1000],dtype=np.float32)
+    brightness = np.mean(gray) / 255.0
+    h, w, _ = img.shape
+    return np.array(
+        [brightness, h / 1000, w / 1000],
+        dtype=np.float32
+    )
 
 # Prediction API
 @app.route("/predict", methods=["POST"])
@@ -60,18 +71,18 @@ def predict():
     img_arr = np.array(img)
 
     img_arr = tf.keras.applications.efficientnet.preprocess_input(img_arr)
-    img_arr = np.expand_dims(img_arr,axis=0)
+    img_arr = np.expand_dims(img_arr, axis=0)
 
     meta = extract_metadata(np.array(img))
-    meta = np.expand_dims(meta,axis=0)
+    meta = np.expand_dims(meta, axis=0)
 
-    preds = model.predict([img_arr,meta])
+    preds = model.predict([img_arr, meta], verbose=0)
     idx = np.argmax(preds)
 
     return jsonify({
         "prediction": class_names[idx],
-        "confidence": float(preds[0][idx]*100)
+        "confidence": float(preds[0][idx] * 100)
     })
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=7860, debug=False)
