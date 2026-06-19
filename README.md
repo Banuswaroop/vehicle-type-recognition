@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚗 Vehicle Type Recognition System
 
 A deep learning-based system that classifies vehicle types (Car, Bus, Truck, Motorcycle) using an EfficientNet-based multimodal model.
@@ -87,4 +88,3 @@ vehicle-type-recognition/
 * Visual feedback with UI enhancements
 
 ---
-
