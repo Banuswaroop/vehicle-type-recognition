@@ -1,5 +1,5 @@
 from flask_cors import CORS
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -11,11 +11,9 @@ CORS(app)
 
 IMG_SIZE = (224, 224)
 
-# Load class names
 with open("class_names.json") as f:
     class_names = json.load(f)
 
-# Rebuild model
 image_input = tf.keras.Input(shape=(224, 224, 3))
 
 base_model = tf.keras.applications.EfficientNetB0(
@@ -38,31 +36,20 @@ combined = tf.keras.layers.Dropout(0.4)(combined)
 
 output = tf.keras.layers.Dense(len(class_names), activation="softmax")(combined)
 
-model = tf.keras.Model(
-    inputs=[image_input, meta_input],
-    outputs=output
-)
+model = tf.keras.Model(inputs=[image_input, meta_input], outputs=output)
 
-# Load weights
 model.load_weights("vehicle_weights.h5")
-print("✅ Model ready!")
 
-# Home page route
-@app.route("/")
-def home():
-    return send_file("index.html")
-
-# Metadata function
 def extract_metadata(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     brightness = np.mean(gray) / 255.0
     h, w, _ = img.shape
-    return np.array(
-        [brightness, h / 1000, w / 1000],
-        dtype=np.float32
-    )
+    return np.array([brightness, h / 1000, w / 1000], dtype=np.float32)
 
-# Prediction API
+@app.route("/")
+def home():
+    return "API is running"
+
 @app.route("/predict", methods=["POST"])
 def predict():
     file = request.files["file"]
@@ -85,4 +72,6 @@ def predict():
     })
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=7860, debug=False)
+    import os
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port)
