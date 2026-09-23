@@ -18,6 +18,12 @@ This project uses **EfficientNetB0** with **multimodal features (image + metadat
 
 It includes a modern interactive UI and a Flask backend API for real-time predictions.
 
+## 🚀 Live Demo
+
+Try Vehicle Type Recognition online:
+
+👉 [**Project Live Demo**](https://huggingface.co/spaces/chillx123/vehicle-type-recognition)
+
 ## 🎯 Features
 
 * 🚗 Vehicle classification: Car, Bus, Truck, Motorcycle
