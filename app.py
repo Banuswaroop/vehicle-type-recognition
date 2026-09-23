@@ -5,6 +5,7 @@ import numpy as np
 import cv2
 from PIL import Image
 import json
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -47,20 +48,24 @@ model = tf.keras.Model(
 model.load_weights("vehicle_weights.h5")
 print("✅ Model ready!")
 
+
 # Home page route
 @app.route("/")
 def home():
     return send_file("index.html")
+
 
 # Metadata function
 def extract_metadata(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     brightness = np.mean(gray) / 255.0
     h, w, _ = img.shape
+
     return np.array(
         [brightness, h / 1000, w / 1000],
         dtype=np.float32
     )
+
 
 # Prediction API
 @app.route("/predict", methods=["POST"])
@@ -84,5 +89,7 @@ def predict():
         "confidence": float(preds[0][idx] * 100)
     })
 
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=7860, debug=False)
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port, debug=False)
